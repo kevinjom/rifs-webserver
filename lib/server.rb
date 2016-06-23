@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 require 'socket'
+require_relative 'response'
+require_relative 'http_status'
 
 module RIFS
   class Server
-    SERVER_NAME = 'rifs-webserver'
 
     # The tcp server
     attr_reader :server
@@ -36,24 +37,13 @@ module RIFS
     end
 
     def handle_request(sock)
-        write_status_line(sock)
-        write_headers(sock)
-        write_body(sock)
-        sock.close
-    end
-
-    def write_status_line(sock)
-      sock.puts 'HTTP/1.1 200 OK'
-    end
-
-    def write_body(sock)
-        sock.puts 'Hello world'
-        sock.puts 'Hello world 2'
-    end
-
-    def write_headers(sock)
-      sock.puts "Server: #{SERVER_NAME}"
-      sock.puts ''
+        response = HttpResponse.new sock
+        response.status = HttpStatus.new 201
+        response.body = 'hello world'
+        sock.puts 'wtf'
+        sock.close unless sock.closed?
+    rescue => e
+      puts e.inspect
     end
 
     def stop
